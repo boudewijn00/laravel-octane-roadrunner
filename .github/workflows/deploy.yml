@@ -1,25 +1,24 @@
-name: Deploy to Server
+name: Sync Files to Server
 
-on:
-  push:
-    branches:
-      - main  # or the branch you want to deploy
+on: [push]
 
 jobs:
-  deploy:
+  sync:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: 🔎 Check IP
-        run: curl https://api.ipify.org
-
-      - name: Deploy to server
-        env:
-          HOST: 23.88.54.223
-          USER: root
-          TARGET_DIR: /root/laravel-octane-roadrunner
+      - name: Set up SSH key
         run: |
-          rsync -avz --delete . $USER@$HOST:$TARGET_DIR
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "23.88.54.223 ecdsa-sha2-nistp256 YourServerSSHHostKey" >> ~/.ssh/known_hosts
+        env:
+          SERVER_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Sync files with rsync
+        run: |
+          rsync -avz --delete ./ root@23.88.54.223:/root/laravel-octane-roadrunner
