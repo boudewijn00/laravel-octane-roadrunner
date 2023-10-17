@@ -7,18 +7,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "23.88.54.223 ecdsa-sha2-nistp256 YourServerSSHHostKey" >> ~/.ssh/known_hosts
-        env:
-          SERVER_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            known_hosts: unnecessary
 
-      - name: Sync files with rsync
-        run: |
-          rsync -avz --delete ./ root@23.88.54.223:/root/laravel-octane-roadrunner
+      - name: Adding Known Hosts
+        run: ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/root/laravel-octane-roadrunner
