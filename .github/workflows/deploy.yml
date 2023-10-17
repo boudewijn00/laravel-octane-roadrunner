@@ -1,0 +1,29 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # or the branch you want to deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to server
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          HOST: 23.88.54.223
+          USER: root
+          TARGET_DIR: /root/laravel-octane-roadrunner
+        run: |
+          # Install ssh-agent
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${DEPLOY_SSH_KEY}"
+          # Disable host key checking (Note: This is insecure and you should ideally set up known hosts)
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          # Copy code to server
+          rsync -avz --delete . $USER@$HOST:$TARGET_DIR
