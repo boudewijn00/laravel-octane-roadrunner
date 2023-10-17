@@ -22,3 +22,5 @@ jobs:
         run: |
           # Install ssh-agent
           eval "$(ssh-agent -s)"
+          # echo deploy ssh key
+          echo "$DEPLOY_SSH_KEY"
