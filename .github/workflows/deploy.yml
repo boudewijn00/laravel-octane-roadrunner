@@ -11,8 +11,8 @@ jobs:
 
       - name: Copy SSH key
         run: |
-          echo "${{ secrets.SSH_KEY }}" >> ./id_rsa
+          echo "${{ secrets.SSH_KEY_POP_OS }}" >> ./id_rsa
           chmod 600 id_rsa
 
-      - name: Deploy with rsync
-        run: scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/root/laravel-octane-roadrunner
+      - name: Deploy
+        run: scp -C -o StrictHostKeyChecking=no -i ./id_rsa ./ root@23.88.54.223:/root/laravel-octane-roadrunner
